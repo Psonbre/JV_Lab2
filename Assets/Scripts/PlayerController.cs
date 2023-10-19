@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerController : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class PlayerController : MonoBehaviour
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
 
-		if (Input.GetButtonDown("Jump"))
+		if (Input.GetButtonDown("Jump") && IsGrounded())
 		{
 			rb.velocityY = jumpForce;
 		}
@@ -28,10 +29,18 @@ public class PlayerController : MonoBehaviour
 
 	private void FixedUpdate()
 	{
+		//Acceleration
 		rb.velocityX += horizontalInput * acceleration;
 
+		//Deceleration
 		rb.velocityX -= Mathf.Min(deceleration, Mathf.Abs(rb.velocityX)) * Mathf.Sign(rb.velocityX);
 
+		//Max Speed
 		rb.velocityX = Mathf.Clamp(rb.velocityX, -maxSpeed, maxSpeed);
+	}
+
+	private bool IsGrounded()
+	{
+		return Physics2D.BoxCast(transform.position, new(0.9f, 0.9f), 0, Vector2.down, 0.1f);
 	}
 }
