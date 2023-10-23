@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         actualLevel = SceneManager.GetActiveScene().buildIndex;
+        bonus = 600;
+        StartCoroutine(DecreasBonusScoreWithTime());
     }
 
     void Update()
@@ -87,7 +89,8 @@ public class GameManager : MonoBehaviour
         if (scenesAreInTransition) return;  //Pour éviter plusieurs transitions lancées en bloc
 
         scenesAreInTransition = true;
-
+        score += bonus;
+        bonus = 0;
         StartCoroutine(RestartLevelDelay(delay, GetNextLevel()));
     }
 
@@ -154,5 +157,14 @@ public class GameManager : MonoBehaviour
         if (playerBonusText == null) return;
 
         playerBonusText.text = this.bonus.ToString();
+    }
+
+    private IEnumerator DecreasBonusScoreWithTime()
+    {
+        while (bonus > 0)
+        {
+			yield return new WaitForSeconds(1);
+            bonus -= 5;
+		}
     }
 }
