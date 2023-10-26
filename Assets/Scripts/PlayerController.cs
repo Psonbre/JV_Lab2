@@ -17,8 +17,10 @@ public class PlayerController : MonoBehaviour
 	private bool dying = false;
 	private bool winning = false;
 	private float sustainedJumpTimer;
+	private Animator animator;
     void Start()
     {
+		animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
 		audioSource = FindFirstObjectByType<Camera>().GetComponent<AudioSource>();
 	}
@@ -34,14 +36,17 @@ public class PlayerController : MonoBehaviour
 			
 			if (grounded) 
 			{
+				animator.SetBool("Grounded", false);
 				rb.velocityY = jumpForce;
 				grounded = false;
 				audioSource.PlayOneShot(SoundManager.Instance.PlayerJump);
+				animator.Play("Jump");
 			}
 
 			if (rb.velocityY > 0) rb.velocityY = jumpForce;
 
 		}
+		animator.SetFloat("Speed", Mathf.Abs(rb.velocityX));
 	}
 
 	private void FixedUpdate()
@@ -56,6 +61,8 @@ public class PlayerController : MonoBehaviour
 
 			//Max Speed
 			rb.velocityX = Mathf.Clamp(rb.velocityX, -maxSpeed, maxSpeed);
+
+			if (rb.velocityX != 0) transform.localScale = new(Mathf.Abs(transform.localScale.x) * -Mathf.Sign(rb.velocityX), transform.localScale.y, transform.localScale.z);
 		}
 		else
 		{
@@ -69,6 +76,7 @@ public class PlayerController : MonoBehaviour
 		{
 			StopCoroutine("RevokeGrounded");
 			grounded = true;
+			animator.SetBool("Grounded", true);
 			sustainedJumpTimer = maxSustainedJumpTime;
 		}
 
@@ -95,6 +103,7 @@ public class PlayerController : MonoBehaviour
 
 	IEnumerator RevokeGrounded()
 	{
+		animator.SetBool("Grounded", false);
 		yield return new WaitForSeconds(0.15f);
 		grounded = false;
 	}
